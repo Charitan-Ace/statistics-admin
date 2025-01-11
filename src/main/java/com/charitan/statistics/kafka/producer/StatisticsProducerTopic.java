@@ -1,7 +1,7 @@
 package com.charitan.statistics.kafka.producer;
 
 public enum StatisticsProducerTopic {
-    DONOR_GET_DONATION("donor.get.donation"),
+    DONOR_GET_DONATION("donor-donation-statistics"),
 
     CHARITY_GET_PROJECT("project.get-all-projects-by-charitan-id"),
     CHARITY_DONATION_TOTAL("charity.donation.total"),

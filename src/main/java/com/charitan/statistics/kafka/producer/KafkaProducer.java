@@ -9,12 +9,17 @@ import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
+@Service
 @AllArgsConstructor
 public class KafkaProducer implements KafkaProducerExterrnalAPI {
     private final ReplyingKafkaTemplate<String, Object, Object> replyingKafkaTemplate;
@@ -27,7 +32,7 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(topic.getTopic(), data);
 
-        RequestReplyFuture<String, Object, Object> request = replyingKafkaTemplate.sendAndReceive(record, Duration.ofSeconds(10));
+        RequestReplyFuture<String, Object, Object> request = replyingKafkaTemplate.sendAndReceive(record);
 
         // Wait for the response (blocking)
         var result = request.get();

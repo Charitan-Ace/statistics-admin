@@ -5,6 +5,12 @@ import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharitanIdDto;
 import com.charitan.statistics.jwt.internal.CustomUserDetails;
 import com.charitan.statistics.kafka.producer.KafkaProducerExterrnalAPI;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -13,17 +19,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 @Transactional
+@RequiredArgsConstructor
 @Service
 public class StatisticsService implements StatisticsInternalAPI{
 
-    KafkaProducerExterrnalAPI statisticsProducer;
+    private final KafkaProducerExterrnalAPI statisticsProducer;
+    private final ReplyingKafkaTemplate<String, Object, Object> replyingKafkaTemplate;
 
     @Override
     public InternalStatisticsDto getStatisticsForDonor(UUID donorId) {
         try {
-            GetDonationStatisticsResponseDto response = statisticsProducer.sendGetDonorDonationRequest(new GetDonorDonationStatisticsRequestDto(donorId.toString()));
-
+            GetDonationStatisticsResponseDto response;
+            try {
+                response = statisticsProducer.sendGetDonorDonationRequest(new GetDonorDonationStatisticsRequestDto(donorId.toString()));
+            } catch (RuntimeException e) { // Catch general runtime exceptions if relevant
+                log.error("An error occurred while fetching donation statistics: {}", e.getMessage(), e);
+                throw e;
+            }
+            GetDonorDonationStatisticsRequestDto request = new GetDonorDonationStatisticsRequestDto("d2bd087c-3a6a-4179-91c2-b8595ebc92d3");
+            ProducerRecord<String, Object> record = new ProducerRecord<>("donor-donation-statistics", request);
+            System.out.println(response.getDonorStatistics().toString());
             Map<String, Double> donorStatistics = response.getDonorStatistics();
 
             int count = donorStatistics.size();
