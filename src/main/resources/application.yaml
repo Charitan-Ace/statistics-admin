@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: statistics
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: statistics
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      max.block.ms: 240000
+      spring:
+        json:
+          trusted:
+            packages: "ace.charitan.*"
+
+server:
+  port: 0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.redis: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

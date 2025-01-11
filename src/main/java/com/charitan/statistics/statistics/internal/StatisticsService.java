@@ -1,106 +1,90 @@
 package com.charitan.statistics.statistics.internal;
 
-import com.charitan.statistics.kafka.producer.StatisticsProducerExterrnalAPI;
+import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
+import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
+import ace.charitan.common.dto.project.GetProjectByCharitanIdDto;
+import com.charitan.statistics.jwt.internal.CustomUserDetails;
+import com.charitan.statistics.kafka.producer.KafkaProducerExterrnalAPI;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Transactional
 @Service
 public class StatisticsService implements StatisticsInternalAPI{
 
-    StatisticsProducerExterrnalAPI statisticsProducer;
+    KafkaProducerExterrnalAPI statisticsProducer;
 
     @Override
-    public double getTotalDonationsForUser(UUID userId) {
-        return 0;
+    public InternalStatisticsDto getStatisticsForDonor(UUID donorId) {
+        try {
+            GetDonationStatisticsResponseDto response = statisticsProducer.sendGetDonorDonationRequest(new GetDonorDonationStatisticsRequestDto(donorId.toString()));
+
+            Map<String, Double> donorStatistics = response.getDonorStatistics();
+
+            int count = donorStatistics.size();
+            double totalValue = donorStatistics.values().stream().mapToDouble(Double::doubleValue).sum();
+
+            return new InternalStatisticsDto(donorId, count, totalValue);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public long getTotalProjectsForUser(UUID userId) {
-        return 0;
+    public InternalStatisticsDto getStatisticsForCharity(UUID charityId) {
+        try {
+            GetProjectByCharitanIdDto.GetProjectByCharitanIdResponseDto response = statisticsProducer.sendGetProjectByCharitanId(new GetProjectByCharitanIdDto.GetProjectByCharitanIdRequestDto(charityId.toString(), Arrays.asList("PROJECT_DELETED", "PROJECT_COMPLETED")));
+            System.out.println(Arrays.toString(response.getProjectDtoList().toArray()));
+            return new InternalStatisticsDto(charityId, 0, 0);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void recalculateStatistics() {
-
+    public InternalAllStatisticsDto getStatisticsAll() {
+        try {
+            long projectsCount = statisticsProducer.sendProjectCountRequest().totalProjects();
+            double totalValue = statisticsProducer.sendTotalValueRequest().totalValue();
+            return new InternalAllStatisticsDto(projectsCount, totalValue);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void updateDonationStats(String donor, double amount, String category, String continent, String country, String timestamp) {
+    public InternalStatisticsDto getMyStatistics() {
 
+        getCurrentDonorId();
+        return null;
+//        if (userId != null) {
+//            if (role.equalsIgnoreCase("DONOR")) {
+//                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForDonor(userId));
+//            }
+//            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForCharity(userId));
+//        } else {
+//            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll());
+//        }
     }
 
-    @Override
-    public void updateProjectStats(String category, String continent, String country, String startTime, String username) {
+    private UUID getCurrentDonorId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    }
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
 
-    @Override
-    public Map<Object, Object> getTotalDonationsByCategory() {
-        return Map.of();
-    }
+            if (principal instanceof CustomUserDetails) {
+                // Assuming CustomUserDetails holds the User ID
+                System.out.println(Arrays.toString(((CustomUserDetails) principal).getAuthorities().toArray()));
+                return ((CustomUserDetails) principal).getUserId();
+            }
+        }
 
-    @Override
-    public Map<Object, Object> getTotalProjectsByCategory() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalDonationsByContinent() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalProjectsByContinent() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalDonationsByCountry() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalProjectsByCountry() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalDonationsByDate() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getTotalProjectsByDate() {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getDonationsByCategoryForUser(String username) {
-        return Map.of();
-    }
-
-    @Override
-    public Map<Object, Object> getProjectsByCategoryForUser(String username) {
-        return Map.of();
-    }
-
-    @Override
-    public double getTotalDonations() {
-        return 0;
-    }
-
-    @Override
-    public long getTotalProjects() {
-        return 0;
-    }
-
-    @Override
-    public Map<String, Object> getFilteredStatistics(Optional<String> continent, Optional<String> country, Optional<String> category, Optional<String> startDate, Optional<String> endDate, Optional<String> username) {
-        return Map.of();
+        throw new RuntimeException("Current user id is not found");
     }
 }
