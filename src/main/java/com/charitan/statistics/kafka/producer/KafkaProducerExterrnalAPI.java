@@ -2,16 +2,17 @@ package com.charitan.statistics.kafka.producer;
 
 import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
 import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
-import ace.charitan.common.dto.project.GetProjectByCharitanIdDto;
 import ace.charitan.common.dto.statistics.project.GetProjectsCountResponse;
 import ace.charitan.common.dto.statistics.project.GetTotalValueResponse;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 
 import java.util.concurrent.ExecutionException;
 
 public interface KafkaProducerExterrnalAPI {
 
     //Charity
-    public GetProjectByCharitanIdDto.GetProjectByCharitanIdResponseDto sendGetProjectByCharitanId(GetProjectByCharitanIdDto.GetProjectByCharitanIdRequestDto request) throws ExecutionException, InterruptedException;
+    public GetProjectByCharityIdResponseDto sendGetProjectByCharitanId(GetProjectByCharityIdRequestDto request) throws ExecutionException, InterruptedException;
 //    public GetCharityProjectCountResponseDto sendCharityProjectCountRequest(GetCharityProjectCountRequestDto request) throws ExecutionException, InterruptedException;
 //    public GetCharityTotalValueResponseDto sendCharityTotalValueRequest(GetCharityTotalValueRequestDto request) throws ExecutionException, InterruptedException;
     //Donor

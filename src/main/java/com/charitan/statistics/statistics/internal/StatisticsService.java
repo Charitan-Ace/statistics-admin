@@ -2,16 +2,16 @@ package com.charitan.statistics.statistics.internal;
 
 import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
 import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
-import ace.charitan.common.dto.project.GetProjectByCharitanIdDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 import com.charitan.statistics.jwt.internal.CustomUserDetails;
 import com.charitan.statistics.kafka.producer.KafkaProducerExterrnalAPI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +55,7 @@ public class StatisticsService implements StatisticsInternalAPI{
     @Override
     public InternalStatisticsDto getStatisticsForCharity(UUID charityId) {
         try {
-            GetProjectByCharitanIdDto.GetProjectByCharitanIdResponseDto response = statisticsProducer.sendGetProjectByCharitanId(new GetProjectByCharitanIdDto.GetProjectByCharitanIdRequestDto(charityId.toString(), Arrays.asList("PROJECT_DELETED", "PROJECT_COMPLETED")));
+            GetProjectByCharityIdResponseDto response = statisticsProducer.sendGetProjectByCharitanId(new GetProjectByCharityIdRequestDto(charityId.toString(), Arrays.asList("PROJECT_DELETED", "PROJECT_COMPLETED")));
             System.out.println(Arrays.toString(response.getProjectDtoList().toArray()));
             return new InternalStatisticsDto(charityId, 0, 0);
         } catch (ExecutionException | InterruptedException e) {
@@ -77,28 +77,39 @@ public class StatisticsService implements StatisticsInternalAPI{
     @Override
     public InternalStatisticsDto getMyStatistics() {
 
-        getCurrentDonorId();
-        return null;
-//        if (userId != null) {
-//            if (role.equalsIgnoreCase("DONOR")) {
-//                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForDonor(userId));
-//            }
-//            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForCharity(userId));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll());
-//        }
+        if (getCurrentDonorRole().equalsIgnoreCase(("role_donor"))) {
+            return getStatisticsForDonor(getCurrentUserId());
+        }
+        return getStatisticsForCharity(getCurrentUserId());
     }
 
-    private UUID getCurrentDonorId() {
+    private UUID getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
 
             if (principal instanceof CustomUserDetails) {
-                // Assuming CustomUserDetails holds the User ID
                 System.out.println(Arrays.toString(((CustomUserDetails) principal).getAuthorities().toArray()));
                 return ((CustomUserDetails) principal).getUserId();
+            }
+        }
+
+        throw new RuntimeException("Current user id is not found");
+    }
+
+    private String getCurrentDonorRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof CustomUserDetails) {
+                // Get the first authority in the list
+                return ((CustomUserDetails) principal).getAuthorities().stream()
+                        .findFirst()
+                        .map(GrantedAuthority::getAuthority)
+                        .orElseThrow(() -> new RuntimeException("No authorities found for current user"));
             }
         }
 

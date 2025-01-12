@@ -2,7 +2,8 @@ package com.charitan.statistics.kafka.producer;
 
 import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
 import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
-import ace.charitan.common.dto.project.GetProjectByCharitanIdDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 import ace.charitan.common.dto.statistics.project.GetProjectsCountResponse;
 import ace.charitan.common.dto.statistics.project.GetTotalValueResponse;
 import lombok.AllArgsConstructor;
@@ -13,11 +14,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
-import org.springframework.stereotype.Component;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
+import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
+
+import static org.springframework.kafka.support.KafkaHeaders.REPLY_TOPIC;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +35,7 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
         }
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(topic.getTopic(), data);
+        record.headers().add(REPLY_TOPIC, REPLY_TOPIC.getBytes());
 
         RequestReplyFuture<String, Object, Object> request = replyingKafkaTemplate.sendAndReceive(record);
 
@@ -45,8 +50,8 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
         return (GetDonationStatisticsResponseDto) send(StatisticsProducerTopic.DONOR_GET_DONATION, request);
     }
 
-    public GetProjectByCharitanIdDto.GetProjectByCharitanIdResponseDto sendGetProjectByCharitanId(GetProjectByCharitanIdDto.GetProjectByCharitanIdRequestDto request) throws ExecutionException, InterruptedException {
-        return (GetProjectByCharitanIdDto.GetProjectByCharitanIdResponseDto) send(StatisticsProducerTopic.CHARITY_GET_PROJECT, request);
+    public GetProjectByCharityIdResponseDto sendGetProjectByCharitanId(GetProjectByCharityIdRequestDto request) throws ExecutionException, InterruptedException {
+        return (GetProjectByCharityIdResponseDto) send(StatisticsProducerTopic.CHARITY_GET_PROJECT, request);
     }
 
     //All
