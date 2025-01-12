@@ -1,5 +1,18 @@
 package com.charitan.statistics.kafka.producer;
 
+import static org.springframework.kafka.support.KafkaHeaders.REPLY_TOPIC;
+
+import java.time.Duration;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
+import org.springframework.stereotype.Service;
+
+import ace.charitan.common.dto.donation.GetCharityDonationStatisticsRequestDto;
 import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
 import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
@@ -7,21 +20,6 @@ import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByChar
 import ace.charitan.common.dto.statistics.project.GetProjectsCountResponse;
 import ace.charitan.common.dto.statistics.project.GetTotalValueResponse;
 import lombok.AllArgsConstructor;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import org.springframework.kafka.requestreply.RequestReplyFuture;
-import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
-import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
-import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.concurrent.ExecutionException;
-
-import static org.springframework.kafka.support.KafkaHeaders.REPLY_TOPIC;
 
 @Service
 @AllArgsConstructor
@@ -46,20 +44,27 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
         return result.value();
     }
 
-    public GetDonationStatisticsResponseDto sendGetDonorDonationRequest(GetDonorDonationStatisticsRequestDto request) throws ExecutionException, InterruptedException {
+    public GetDonationStatisticsResponseDto sendGetDonorDonationRequest(GetDonorDonationStatisticsRequestDto request)
+            throws ExecutionException, InterruptedException {
         return (GetDonationStatisticsResponseDto) send(StatisticsProducerTopic.DONOR_GET_DONATION, request);
     }
 
-    public GetProjectByCharityIdResponseDto sendGetProjectByCharitanId(GetProjectByCharityIdRequestDto request) throws ExecutionException, InterruptedException {
+    public GetProjectByCharityIdResponseDto sendGetProjectByCharitanId(GetProjectByCharityIdRequestDto request)
+            throws ExecutionException, InterruptedException {
         return (GetProjectByCharityIdResponseDto) send(StatisticsProducerTopic.CHARITY_GET_PROJECT, request);
     }
 
-    //All
+    // All
     public GetProjectsCountResponse sendProjectCountRequest() throws ExecutionException, InterruptedException {
         return (GetProjectsCountResponse) send(StatisticsProducerTopic.PROJECT_COUNT, "");
     }
 
     public GetTotalValueResponse sendTotalValueRequest() throws ExecutionException, InterruptedException {
         return (GetTotalValueResponse) send(StatisticsProducerTopic.DONATION_VALUE, "");
+    }
+
+    public GetDonationStatisticsResponseDto sendGetDonorDonationStatistics(GetCharityDonationStatisticsRequestDto dto)
+            throws ExecutionException, InterruptedException {
+        return (GetDonationStatisticsResponseDto) send(StatisticsProducerTopic.CHARITY_DONATION_STATISTICS, dto);
     }
 }

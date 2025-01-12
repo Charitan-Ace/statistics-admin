@@ -7,7 +7,9 @@ public enum StatisticsProducerTopic {
     CHARITY_DONATION_TOTAL("charity.donation.total"),
 
     PROJECT_COUNT("project.count"),
-    DONATION_VALUE("donation.value");
+    DONATION_VALUE("donation.value"),
+
+    CHARITY_DONATION_STATISTICS("charity-donation-statistics");
 
     // Private field for the enum value
     private final String topic;
@@ -21,5 +23,6 @@ public enum StatisticsProducerTopic {
     public String getTopic() {
         return topic;
     }
-//    public static final String CHARITIES_STATISTICS_ALL = "charities.statistics.all";
+    // public static final String CHARITIES_STATISTICS_ALL =
+    // "charities.statistics.all";
 }
