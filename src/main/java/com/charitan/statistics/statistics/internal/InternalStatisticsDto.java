@@ -8,7 +8,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 public class InternalStatisticsDto {
-    private final UUID donorId;
+    private final UUID userId;
     private final long totalProject;
     private final double totalValue;
 }
