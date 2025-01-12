@@ -47,9 +47,9 @@ public class StatisticsService implements StatisticsInternalAPI {
                 log.error("An error occurred while fetching donation statistics: {}", e.getMessage(), e);
                 throw e;
             }
-            GetDonorDonationStatisticsRequestDto request = new GetDonorDonationStatisticsRequestDto(
-                    "d2bd087c-3a6a-4179-91c2-b8595ebc92d3");
-            ProducerRecord<String, Object> record = new ProducerRecord<>("donor-donation-statistics", request);
+            // GetDonorDonationStatisticsRequestDto request = new GetDonorDonationStatisticsRequestDto(
+            //         "d2bd087c-3a6a-4179-91c2-b8595ebc92d3");
+            // ProducerRecord<String, Object> record = new ProducerRecord<>("donor-donation-statistics", request);
             System.out.println(response.getDonorStatistics().toString());
             // Map<String, Double> donorStatistics = response.getDonorStatistics();
 
