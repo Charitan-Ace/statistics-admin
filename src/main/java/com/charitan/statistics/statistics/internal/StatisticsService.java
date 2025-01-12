@@ -6,8 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import ace.charitan.common.dto.auth.GetNewUserByTimeRequestDto;
+import ace.charitan.common.dto.auth.GetNewUserByTimeResponseDto;
+import ace.charitan.common.dto.project.GetProjectsByFilterRequestDto;
+import ace.charitan.common.dto.project.GetProjectsByFilterResponseDto;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,17 +52,7 @@ public class StatisticsService implements StatisticsInternalAPI {
                 log.error("An error occurred while fetching donation statistics: {}", e.getMessage(), e);
                 throw e;
             }
-            // GetDonorDonationStatisticsRequestDto request = new GetDonorDonationStatisticsRequestDto(
-            //         "d2bd087c-3a6a-4179-91c2-b8595ebc92d3");
-            // ProducerRecord<String, Object> record = new ProducerRecord<>("donor-donation-statistics", request);
             System.out.println(response.getDonorStatistics().toString());
-            // Map<String, Double> donorStatistics = response.getDonorStatistics();
-
-            // int count = donorStatistics.size();
-            // double totalValue = donorStatistics.values().stream().mapToDouble(Double::doubleValue).sum();
-
-            // return new InternalStatisticsDto(donorId, count, totalValue);
-
             return new InternalStatisticsDto(donorId, response.getDonorStatistics());
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -76,7 +71,7 @@ public class StatisticsService implements StatisticsInternalAPI {
 
             // Get list of donation values for each project
             GetDonationStatisticsResponseDto donationStatisticsResponseDto = statisticsProducer
-                    .sendGetDonorDonationStatistics(
+                    .sendGetCharityDonationStatistics(
                             new GetCharityDonationStatisticsRequestDto(new GetCharityDonationStatisticsWrapperDto(
                                     projectIdList)));
 
@@ -87,11 +82,19 @@ public class StatisticsService implements StatisticsInternalAPI {
     }
 
     @Override
-    public InternalAllStatisticsDto getStatisticsAll() {
+    public Map<String, Double> getStatisticsAll(String category, String isoCode, String continent, String status) {
         try {
-            long projectsCount = statisticsProducer.sendProjectCountRequest().totalProjects();
-            double totalValue = statisticsProducer.sendTotalValueRequest().totalValue();
-            return new InternalAllStatisticsDto(projectsCount, totalValue);
+            GetProjectsByFilterResponseDto response = statisticsProducer.sendGetProjectIdByFilter(new GetProjectsByFilterRequestDto(category, isoCode, continent, status));
+
+            List<String> projectIdList = response.projectListWrapperDto().projectIdList();
+
+            // Get list of donation values for each project
+            GetDonationStatisticsResponseDto donationStatisticsResponseDto = statisticsProducer
+                    .sendGetCharityDonationStatistics(
+                            new GetCharityDonationStatisticsRequestDto(new GetCharityDonationStatisticsWrapperDto(
+                                    projectIdList)));
+
+            return donationStatisticsResponseDto.getDonorStatistics();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -104,6 +107,17 @@ public class StatisticsService implements StatisticsInternalAPI {
             return getStatisticsForDonor(getCurrentUserId());
         }
         return getStatisticsForCharity(getCurrentUserId());
+    }
+
+    @Override
+//    @PreAuthorize("hasRole('ADMIN')")
+    public List<UUID> getNewUsers(String time) {
+        try {
+            GetNewUserByTimeResponseDto response = statisticsProducer.sendGetNewUserByTime(new GetNewUserByTimeRequestDto(time));
+            return response.userIdList().userIds();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private UUID getCurrentUserId() {

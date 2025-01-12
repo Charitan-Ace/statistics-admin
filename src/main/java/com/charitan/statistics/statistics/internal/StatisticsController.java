@@ -20,12 +20,18 @@ public class StatisticsController {
     private StatisticsInternalAPI statisticsInternalAPI;
 
     /**
-     * Retrieve total donation value and project of an user by admin.
+     * Retrieve total donation value and project of a user by admin.
+     * userId and role for viewing statistics of a user
+     * category, isoCode, continent, status for viewing statistics filtering by admin
      */
     @GetMapping("/totals")
     public ResponseEntity<Object> getTotal(
             @RequestParam(value = "userId", defaultValue = "", required = false) UUID userId,
-            @RequestParam(value = "role", defaultValue = "", required = false) String role) {
+            @RequestParam(value = "role", defaultValue = "", required = false) String role,
+            @RequestParam(value = "category", defaultValue = "", required = false) String category,
+            @RequestParam(value = "isoCode", defaultValue = "", required = false) String isoCode,
+            @RequestParam(value = "continent", defaultValue = "", required = false) String continent,
+            @RequestParam(value = "status", defaultValue = "", required = false) String status) {
         try {
             if (userId != null) {
                 if (role.equalsIgnoreCase("DONOR")) {
@@ -34,7 +40,7 @@ public class StatisticsController {
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForCharity(userId));
             } else {
-                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll());
+                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll(category, isoCode, continent, status));
             }
         } catch (ResponseStatusException e) {
             // If the exception is a ResponseStatusException, return the status and message
@@ -49,6 +55,19 @@ public class StatisticsController {
     public ResponseEntity<Object> getMyTotal() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getMyStatistics());
+        } catch (ResponseStatusException e) {
+            // If the exception is a ResponseStatusException, return the status and message
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            // Handle other exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
+    }
+
+    @GetMapping("/newUser")
+    public ResponseEntity<Object> getNewUser(@RequestParam(value = "time", defaultValue = "week", required = false) String time) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getNewUsers(time));
         } catch (ResponseStatusException e) {
             // If the exception is a ResponseStatusException, return the status and message
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
