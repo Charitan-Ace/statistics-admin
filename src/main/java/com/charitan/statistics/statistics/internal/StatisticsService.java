@@ -1,9 +1,6 @@
 package com.charitan.statistics.statistics.internal;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import ace.charitan.common.dto.auth.GetNewUserByTimeRequestDto;
@@ -88,6 +85,7 @@ public class StatisticsService implements StatisticsInternalAPI {
 
             List<String> projectIdList = response.projectListWrapperDto().projectIdList();
 
+            System.out.println(Arrays.toString(projectIdList.toArray()));
             // Get list of donation values for each project
             GetDonationStatisticsResponseDto donationStatisticsResponseDto = statisticsProducer
                     .sendGetCharityDonationStatistics(

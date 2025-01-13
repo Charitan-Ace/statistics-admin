@@ -39,6 +39,7 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
         ProducerRecord<String, Object> record = new ProducerRecord<>(topic.getTopic(), data);
         record.headers().add(REPLY_TOPIC, REPLY_TOPIC.getBytes());
 
+        replyingKafkaTemplate.setDefaultReplyTimeout(Duration.ofSeconds(30));
         RequestReplyFuture<String, Object, Object> request = replyingKafkaTemplate.sendAndReceive(record);
 
         // Wait for the response (blocking)
@@ -64,15 +65,6 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
     public GetDonationStatisticsResponseDto sendGetCharityDonationStatistics(GetCharityDonationStatisticsRequestDto dto)
             throws ExecutionException, InterruptedException {
         return (GetDonationStatisticsResponseDto) send(StatisticsProducerTopic.CHARITY_DONATION_STATISTICS, dto);
-    }
-
-    // All
-    public GetProjectsCountResponse sendProjectCountRequest() throws ExecutionException, InterruptedException {
-        return (GetProjectsCountResponse) send(StatisticsProducerTopic.PROJECT_COUNT, "");
-    }
-
-    public GetTotalValueResponse sendTotalValueRequest() throws ExecutionException, InterruptedException {
-        return (GetTotalValueResponse) send(StatisticsProducerTopic.DONATION_VALUE, "");
     }
 
     // Get project with filter

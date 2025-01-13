@@ -33,12 +33,6 @@ public interface KafkaProducerExterrnalAPI {
     public GetDonationStatisticsResponseDto sendGetDonorDonationRequest(GetDonorDonationStatisticsRequestDto request)
             throws ExecutionException, InterruptedException;
 
-    // All
-    public GetProjectsCountResponse sendProjectCountRequest() throws ExecutionException, InterruptedException;
-
-    public GetTotalValueResponse sendTotalValueRequest() throws ExecutionException, InterruptedException;
-
-
     public GetProjectsByFilterResponseDto sendGetProjectIdByFilter(GetProjectsByFilterRequestDto request)
             throws ExecutionException, InterruptedException;
 
