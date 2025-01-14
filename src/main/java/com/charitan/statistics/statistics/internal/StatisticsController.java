@@ -31,7 +31,8 @@ public class StatisticsController {
             @RequestParam(value = "category", defaultValue = "", required = false) String category,
             @RequestParam(value = "isoCode", defaultValue = "", required = false) String isoCode,
             @RequestParam(value = "continent", defaultValue = "", required = false) String continent,
-            @RequestParam(value = "status", defaultValue = "", required = false) String status) {
+            @RequestParam(value = "status", defaultValue = "", required = false) String status,
+            @RequestParam(value = "time", defaultValue = "all", required = false) String time) {
         try {
             if (userId != null) {
                 if (role.equalsIgnoreCase("DONOR")) {
@@ -40,7 +41,7 @@ public class StatisticsController {
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsForCharity(userId));
             } else {
-                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll(category, isoCode, continent, status));
+                return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getStatisticsAll(category, isoCode, continent, status, time));
             }
         } catch (ResponseStatusException e) {
             // If the exception is a ResponseStatusException, return the status and message

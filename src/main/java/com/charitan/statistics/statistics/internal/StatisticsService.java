@@ -69,7 +69,7 @@ public class StatisticsService implements StatisticsInternalAPI {
             // Get list of donation values for each project
             GetDonationStatisticsResponseDto donationStatisticsResponseDto = statisticsProducer
                     .sendGetCharityDonationStatistics(
-                            new GetCharityDonationStatisticsRequestDto(new GetCharityDonationStatisticsWrapperDto(
+                            new GetCharityDonationStatisticsRequestDto("all", new GetCharityDonationStatisticsWrapperDto(
                                     projectIdList)));
 
             return new InternalStatisticsDto(charityId, donationStatisticsResponseDto.getDonorStatistics());
@@ -79,7 +79,7 @@ public class StatisticsService implements StatisticsInternalAPI {
     }
 
     @Override
-    public Map<String, Double> getStatisticsAll(String category, String isoCode, String continent, String status) {
+    public Map<String, Double> getStatisticsAll(String category, String isoCode, String continent, String status, String time) {
         try {
             GetProjectsByFilterResponseDto response = statisticsProducer.sendGetProjectIdByFilter(new GetProjectsByFilterRequestDto(category, isoCode, continent, status));
 
@@ -89,7 +89,7 @@ public class StatisticsService implements StatisticsInternalAPI {
             // Get list of donation values for each project
             GetDonationStatisticsResponseDto donationStatisticsResponseDto = statisticsProducer
                     .sendGetCharityDonationStatistics(
-                            new GetCharityDonationStatisticsRequestDto(new GetCharityDonationStatisticsWrapperDto(
+                            new GetCharityDonationStatisticsRequestDto(time, new GetCharityDonationStatisticsWrapperDto(
                                     projectIdList)));
 
             return donationStatisticsResponseDto.getDonorStatistics();
