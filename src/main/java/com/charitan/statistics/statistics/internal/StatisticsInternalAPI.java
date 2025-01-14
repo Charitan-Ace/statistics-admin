@@ -10,4 +10,6 @@ public interface StatisticsInternalAPI {
     public Map<String, Double> getStatisticsAll(String category, String isoCode, String continent, String status, String time);
     public InternalStatisticsDto getMyStatistics();
     public List<UUID> getNewUsers(String time);
+    public Map<String, Double> getTopDonors();
+    public Map<String, Double> getTopDonorsOfCharity();
 }

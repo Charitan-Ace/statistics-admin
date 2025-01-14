@@ -78,6 +78,32 @@ public class StatisticsController {
         }
     }
 
+    @GetMapping("/top/donors")
+    public ResponseEntity<Object> getTopDonors() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getTopDonors());
+        } catch (ResponseStatusException e) {
+            // If the exception is a ResponseStatusException, return the status and message
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            // Handle other exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
+    }
+
+    @GetMapping("/top/donors/charity")
+    public ResponseEntity<Object> getTopDonorsOfCharity() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(statisticsInternalAPI.getTopDonorsOfCharity());
+        } catch (ResponseStatusException e) {
+            // If the exception is a ResponseStatusException, return the status and message
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            // Handle other exceptions
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
+        }
+    }
+
     /**
      * Retrieve total donation value and project of an user by themselves.
      */
