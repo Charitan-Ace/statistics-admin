@@ -86,6 +86,6 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
     // Get top donors of charities
     public GetDonorsOfTheMonthResponseDto sendGetTopDonorOfTheMonth(GetCharityDonorsOfTheMonthRequestDto dto)
             throws ExecutionException, InterruptedException {
-        return (GetDonorsOfTheMonthResponseDto) send(StatisticsProducerTopic.TOP_DONOR_MONTH_CHARITY, "");
+        return (GetDonorsOfTheMonthResponseDto) send(StatisticsProducerTopic.TOP_DONOR_MONTH_CHARITY, dto);
     }
 }
