@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 import ace.charitan.common.dto.auth.GetNewUserByTimeRequestDto;
 import ace.charitan.common.dto.auth.GetNewUserByTimeResponseDto;
+import ace.charitan.common.dto.donation.*;
 import ace.charitan.common.dto.project.GetProjectsByFilterRequestDto;
 import ace.charitan.common.dto.project.GetProjectsByFilterResponseDto;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -16,9 +17,6 @@ import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.stereotype.Service;
 
-import ace.charitan.common.dto.donation.GetCharityDonationStatisticsRequestDto;
-import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
-import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 import ace.charitan.common.dto.statistics.project.GetProjectsCountResponse;
@@ -77,5 +75,17 @@ public class KafkaProducer implements KafkaProducerExterrnalAPI {
     public GetNewUserByTimeResponseDto sendGetNewUserByTime(GetNewUserByTimeRequestDto request)
             throws ExecutionException, InterruptedException {
         return (GetNewUserByTimeResponseDto) send(StatisticsProducerTopic.GET_NEW_USER, request);
+    }
+
+    // Get top donors
+    public GetDonorsOfTheMonthResponseDto sendGetTopDonorOfTheMonth()
+            throws ExecutionException, InterruptedException {
+        return (GetDonorsOfTheMonthResponseDto) send(StatisticsProducerTopic.TOP_DONOR_MONTH, "");
+    }
+
+    // Get top donors of charities
+    public GetDonorsOfTheMonthResponseDto sendGetTopDonorOfTheMonth(GetCharityDonorsOfTheMonthRequestDto dto)
+            throws ExecutionException, InterruptedException {
+        return (GetDonorsOfTheMonthResponseDto) send(StatisticsProducerTopic.TOP_DONOR_MONTH_CHARITY, "");
     }
 }

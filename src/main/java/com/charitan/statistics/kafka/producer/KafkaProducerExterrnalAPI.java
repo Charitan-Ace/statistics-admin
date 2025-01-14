@@ -4,9 +4,7 @@ import java.util.concurrent.ExecutionException;
 
 import ace.charitan.common.dto.auth.GetNewUserByTimeRequestDto;
 import ace.charitan.common.dto.auth.GetNewUserByTimeResponseDto;
-import ace.charitan.common.dto.donation.GetCharityDonationStatisticsRequestDto;
-import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
-import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
+import ace.charitan.common.dto.donation.*;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
 import ace.charitan.common.dto.project.GetProjectsByFilterRequestDto;
@@ -37,5 +35,11 @@ public interface KafkaProducerExterrnalAPI {
             throws ExecutionException, InterruptedException;
 
     public GetNewUserByTimeResponseDto sendGetNewUserByTime(GetNewUserByTimeRequestDto request)
+            throws ExecutionException, InterruptedException;
+
+    public GetDonorsOfTheMonthResponseDto sendGetTopDonorOfTheMonth()
+            throws ExecutionException, InterruptedException;
+
+    public GetDonorsOfTheMonthResponseDto sendGetTopDonorOfTheMonth(GetCharityDonorsOfTheMonthRequestDto dto)
             throws ExecutionException, InterruptedException;
 }

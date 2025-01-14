@@ -2,10 +2,12 @@ package com.charitan.statistics.kafka.producer;
 
 public enum StatisticsProducerTopic {
     DONOR_GET_DONATION("donor-donation-statistics"),
+    TOP_DONOR_MONTH("donors-of-the-month"),
 
     CHARITY_GET_PROJECT("project.get-all-projects-by-charitan-id"),
     CHARITY_GET_PROJECT_BY_FILTER("project.get-all-projects-by-filter"),
     CHARITY_DONATION_TOTAL("charity.donation.total"),
+    TOP_DONOR_MONTH_CHARITY("charity-donors-of-the-month"),
 
     PROJECT_COUNT("project.count"),
     DONATION_VALUE("donation.value"),

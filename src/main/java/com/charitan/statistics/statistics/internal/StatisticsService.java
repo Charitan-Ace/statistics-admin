@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import ace.charitan.common.dto.auth.GetNewUserByTimeRequestDto;
 import ace.charitan.common.dto.auth.GetNewUserByTimeResponseDto;
+import ace.charitan.common.dto.donation.*;
 import ace.charitan.common.dto.project.GetProjectsByFilterRequestDto;
 import ace.charitan.common.dto.project.GetProjectsByFilterResponseDto;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -19,10 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.charitan.statistics.jwt.internal.CustomUserDetails;
 import com.charitan.statistics.kafka.producer.KafkaProducerExterrnalAPI;
 
-import ace.charitan.common.dto.donation.GetCharityDonationStatisticsRequestDto;
-import ace.charitan.common.dto.donation.GetCharityDonationStatisticsWrapperDto;
-import ace.charitan.common.dto.donation.GetDonationStatisticsResponseDto;
-import ace.charitan.common.dto.donation.GetDonorDonationStatisticsRequestDto;
 import ace.charitan.common.dto.project.ExternalProjectDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdRequestDto;
 import ace.charitan.common.dto.project.GetProjectByCharityIdDto.GetProjectByCharityIdResponseDto;
@@ -113,6 +110,38 @@ public class StatisticsService implements StatisticsInternalAPI {
         try {
             GetNewUserByTimeResponseDto response = statisticsProducer.sendGetNewUserByTime(new GetNewUserByTimeRequestDto(time));
             return response.userIdList().userIds();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Map<String, Double> getTopDonors() {
+        try {
+            GetDonorsOfTheMonthResponseDto response = statisticsProducer.sendGetTopDonorOfTheMonth();
+            return response.getDonors();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Map<String, Double> getTopDonorsOfCharity() {
+        try {
+            GetProjectByCharityIdResponseDto response = statisticsProducer
+                    .sendGetProjectByCharitanId(new GetProjectByCharityIdRequestDto(getCurrentUserId().toString(),
+                            Arrays.asList("PROJECT_DELETED", "PROJECT_COMPLETED")));
+            List<ExternalProjectDto> projectDtos = response.getProjectDtoList();
+
+            List<String> projectIdList = projectDtos.stream().map(pDto -> pDto.getId()).toList();
+            System.out.println(Arrays.toString(projectIdList.toArray()));
+            GetDonorsOfTheMonthResponseDto responseDto = statisticsProducer
+                    .sendGetTopDonorOfTheMonth(
+                            new GetCharityDonorsOfTheMonthRequestDto(new GetCharityDonorsOfTheMonthWrapperDto(
+                                    projectIdList
+                            )));
+
+            return responseDto.getDonors();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
